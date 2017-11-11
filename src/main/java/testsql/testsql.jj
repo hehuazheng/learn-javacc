@@ -1,0 +1,110 @@
+options
+{
+JDK_VERSION = "1.7";
+STATIC = false;
+}
+
+PARSER_BEGIN(SqlParser)
+package testsql;
+
+import java.util.*;
+
+public class SqlParser {
+    private List<String> fromTables = new ArrayList<String>();
+
+	public static void main( String[] args )throws ParseException, TokenMgrError, NumberFormatException {
+		SqlParser parser = new SqlParser( System.in ) ;
+		parser.start() ;
+		parser.show();
+	}
+
+    public void addFromTable(String name, String alias) {
+        if(alias != null) {
+            fromTables.add(name + "." + alias);
+        } else {
+            fromTables.add(name);
+        }
+    }
+
+    public void show() {
+        System.out.println(fromTables);
+    }
+}
+
+PARSER_END(SqlParser)
+
+SKIP:{
+  " "
+  | "\t"
+  | "\n"
+  | "\r"
+  | "\r\n"
+}
+
+TOKEN:{
+  <SELECT: "select">
+  |<COMMA: ",">
+  |<LPAREN: "(">
+  |<RPAREN: ")">
+  |<FROM: "from">
+  |<WHERE: "where">
+  |<AS: "as">
+  |<INNER:"inner">
+  |<LEFT:"left">
+  |<RIGHT:"right">
+  |<JOIN:"join">
+  |<ON:"on">
+  |<AND:"and">
+  |<OR:"or">
+  |<DOT: ".">
+  |<SQ: "'">
+  |<IN: "in">
+  |<GROUP: "group">
+  |<BY: "by">
+  |<ORDER: "order">
+  |<ASC: "asc">
+  |<DESC: "desc">
+  |<LIMIT:"limit">
+  |<PLUS :"+">
+  |<NUMBER:(["0"-"9"])+>
+  |<EQ: "=">
+  |<GE: ">=">
+  |<LE: "<=">
+  |<GT: ">">
+  |<LT: "<">
+  |<IDENTIFIER: (["a"-"z"]|["A"-"Z"])+(["a"-"z"]|["A"-"Z"]|["0"-"9"]|"_")*>
+  |<SINGLE_QUOTE_STRING: "'"(~["'"])+"'">
+  |<END: "#">
+}
+
+void start() throws NumberFormatException:
+{
+  Token t1=null, t2=null;
+}
+{
+  <SELECT>
+    <IDENTIFIER>(<DOT><IDENTIFIER>)? (<AS> <IDENTIFIER>)? (<COMMA> <IDENTIFIER>(<DOT><IDENTIFIER>)? (<AS> <IDENTIFIER>)?)*
+  <FROM>
+  t1=<IDENTIFIER>
+  (<AS> t2=<IDENTIFIER>)? {
+       if(t2 != null) {
+           addFromTable(t1.image, t2.image);
+       } else {
+           addFromTable(t1.image, t1.image);
+       }
+       t1 = null;
+       t2 = null;
+  }
+  ((<INNER> | <LEFT> | <RIGHT>)?
+  <JOIN> t1=<IDENTIFIER> (<AS> t2=<IDENTIFIER>)?{
+       if(t2 != null) {
+          addFromTable(t1.image, t2.image);
+      } else {
+          addFromTable(t1.image, t1.image);
+      }
+       t1 = null;
+       t2 = null;
+  } <ON> <IDENTIFIER><DOT><IDENTIFIER><EQ><IDENTIFIER><DOT><IDENTIFIER> (<AND> <IDENTIFIER><DOT><IDENTIFIER><EQ><IDENTIFIER><DOT><IDENTIFIER>)*)*
+    <WHERE> <IDENTIFIER>(<DOT><IDENTIFIER>)?<EQ>(<SINGLE_QUOTE_STRING>|<NUMBER>)
+   <END>
+}

@@ -1,0 +1,53 @@
+options
+{
+JDK_VERSION = "1.7";
+STATIC = false;
+}
+
+PARSER_BEGIN(Adder)
+package adder;
+
+public class Adder{
+  public static void main(String[] args)  throws ParseException, TokenMgrError{
+      Adder adder= new Adder(System.in);
+      int res = adder.start();
+      System.out.println("res:" + res);
+  }
+}
+PARSER_END(Adder)
+
+SKIP:{
+  " "
+  | "\t"
+  | "\n"
+  | "\r"
+  | "\r\n"
+}
+
+TOKEN:{
+  <PLUS :"+">
+  |<NUMBER:(["0"-"9"])+>
+  |<EQ: "=">
+}
+
+int start() throws NumberFormatException:
+{
+  Token t;
+  int i;
+  int value;
+}
+{
+  t = <NUMBER>
+  { value = Integer.parseInt(t.image); }
+  (
+      <PLUS>
+      t = <NUMBER>
+     {
+         i = Integer.parseInt(t.image);
+         value += i;
+     }
+   )*
+   <EQ>
+   { return value; }
+   <EOF>
+}

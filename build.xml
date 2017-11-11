@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="learn-javacc">
+    <target name="build-hzz-calc">
+        <javacc target="src/main/java/com/hzz/calc.jj" javacchome="lib"/>
+    </target>
+    <target name="build-adder">
+        <delete file="src/main/java/adder/*"  excludesfile="src/main/java/adder/adder.jj" />
+        <javacc target="src/main/java/adder/adder.jj" javacchome="lib"/>
+    </target>
+    <target name="build-testsql">
+        <delete file="src/main/java/testsql/*"  excludesfile="src/main/java/testsql/testsql.jj" />
+        <javacc target="src/main/java/testsql/testsql.jj" javacchome="lib"/>
+    </target>
+</project>
